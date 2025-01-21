@@ -128,17 +128,6 @@ def show_home_page():
             else:
                 st.error("No questions found for this module.")
 
-
-def calculate_score(questions):
-    correct = 0
-    total = len(questions)
-    for i, q in enumerate(questions):
-        if i in st.session_state.user_answers:
-            user_ans = st.session_state.user_answers[i]
-            if user_ans.startswith(q['correct_letter'].upper() + ')'):
-                correct += 1
-    return correct, total
-
 def is_answer_correct(question, user_answer):
     if user_answer is None:
         return False
@@ -149,8 +138,24 @@ def is_answer_correct(question, user_answer):
     # Normalize correct answer by removing leading letter and parenthesis (e.g., "B)")
     normalized_correct_answer = re.sub(r"^[a-dA-D]\)", "", question['correct_answer']).strip()
 
+    # Debugging: Print the normalized answers for comparison
+    print(f"User Answer: {normalized_user_answer}, Correct Answer: {normalized_correct_answer}")
+
     # Compare the normalized answers, ignoring case
     return normalized_user_answer.lower() == normalized_correct_answer.lower()
+
+def calculate_score(questions):
+    correct = 0
+    total = len(questions)
+    for i, q in enumerate(questions):
+        if i in st.session_state.user_answers:
+            user_ans = st.session_state.user_answers[i]
+            # Debugging: Check what answers are being compared
+            print(f"Checking question {i + 1}: User answer = {user_ans}, Correct answer = {q['correct_letter']})")
+            if user_ans.startswith(q['correct_letter'].upper() + ')'):
+                correct += 1
+    return correct, total
+
     
 def main():
     st.set_page_config(page_title="Professional Exam Portal", layout="wide")
