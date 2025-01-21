@@ -73,7 +73,7 @@ def show_home_page():
         """
         <style>
         h1 {
-            font-size: 50px;
+            font-size: 10px;
             color: purple;
             font-weight: bold;
             font-family: Arial, sans-serif;
