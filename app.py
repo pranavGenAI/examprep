@@ -121,6 +121,7 @@ def calculate_score(questions):
     for i, q in enumerate(questions):
         if i in st.session_state.user_answers:
             user_ans = st.session_state.user_answers[i]
+            # Ensure the answer matches the correct letter (A, B, C, D)
             if user_ans.startswith(q['correct_letter'].upper() + ')'):
                 correct += 1
     return correct, total
@@ -151,8 +152,6 @@ def main():
         return
 
     # Exam Interface
-# In the exam interface part, where you display the questions:
-
     if not st.session_state.exam_submitted:
         st.title(f"Exam: {st.session_state.selected_section}")
         st.subheader(f"Module: {st.session_state.selected_module}")
@@ -227,34 +226,13 @@ def main():
         for i, question in enumerate(questions):
             user_answer = st.session_state.user_answers.get(i)
             is_correct = is_answer_correct(question, user_answer)
-            status_color = "correct" if is_correct else "incorrect"
-            st.markdown(f"<div class='review-header-{status_color}'>Question {i + 1}: {'✓ Correct' if is_correct else '✗ Incorrect'}</div>", unsafe_allow_html=True)
+            review_class = "review-header-correct" if is_correct else "review-header-incorrect"
+            st.markdown(f"<div class='{review_class}'>Q{i + 1}: {question['question']}</div>", unsafe_allow_html=True)
+            st.markdown(f"Your Answer: {user_answer}", unsafe_allow_html=True)
+            st.markdown(f"Correct Answer: {question['correct_answer']}", unsafe_allow_html=True)
+            st.markdown(f"Explanation: {question['description']}", unsafe_allow_html=True)
+            st.markdown("---")
             
-            with st.expander(f"View Details"):
-                st.write("**Question:**", question['question'])
-                st.write("**Options:**")
-                for idx, option in enumerate(question['options']):
-                    if idx == (ord(question['correct_letter']) - ord('a')):
-                        st.success(f"{option} ✓")
-                    elif user_answer == option:
-                        st.error(f"{option} ✗")
-                    else:
-                        st.write(option)
-                st.write("**Your Answer:**", user_answer or "Not answered")
-                st.write("**Correct Answer:**", question['correct_answer'])
-                if question['description']:
-                    st.write("**Explanation:**", question['description'])
-
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Return to Home"):
-                st.session_state.clear()
-                st.rerun()
-        with col2:
-            if st.button("Start New Exam"):
-                st.session_state.exam_submitted = False
-                st.session_state.clear()
-                st.rerun()
-
+# Run the main function
 if __name__ == "__main__":
     main()
