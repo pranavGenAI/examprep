@@ -107,14 +107,6 @@ def show_home_page():
             else:
                 st.error("No questions found for this module.")
 
-# Answer Check and Score Calculation
-def is_answer_correct(question, user_answer):
-    if user_answer is None:
-        return False
-    normalized_user_answer = re.sub(r"^[a-dA-D]\)", "", user_answer).strip().lower()
-    normalized_correct_answer = re.sub(r"^[a-dA-D]\)", "", question['correct_answer']).strip().lower()
-    return normalized_user_answer == normalized_correct_answer
-
 def calculate_score(questions):
     correct = 0
     total = len(questions)
@@ -124,6 +116,12 @@ def calculate_score(questions):
             if user_ans.startswith(q['correct_letter'].upper() + ')'):
                 correct += 1
     return correct, total
+
+def is_answer_correct(question, user_answer):
+    if user_answer is None:
+        return False
+    return user_answer.startswith(question['correct_letter'].upper() + ')')
+
 
 # Main Function to display the exam and results
 def main():
