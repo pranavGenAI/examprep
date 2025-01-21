@@ -86,44 +86,29 @@ def show_home_page():
         st.error("No sections found in the Excel file. Please check the format.")
         return
     
-    # Section selection with larger tiles
+    # Section selection with 3 tiles per row
     st.header("Select Exam Section")
-    num_tiles = len(section_modules)
-    num_cols = 3  # We want no more than 3 columns
-    num_rows = (num_tiles // num_cols) + (1 if num_tiles % num_cols != 0 else 0)
+    columns = st.columns(3)  # Create 3 columns for sections
+    for idx, section in enumerate(section_modules.keys()):
+        with columns[idx % 3]:  # Distribute sections into 3 columns
+            if st.button(section, key=f"section_{section}", use_container_width=True):
+                st.session_state.selected_section = section
+                st.session_state.selected_module = None  # Reset selected module
+                st.session_state.exam_started = False
+                st.rerun()
     
-    tile_buttons = []
-    for row in range(num_rows):
-        cols = st.columns(num_cols)
-        for col in range(num_cols):
-            section_index = row * num_cols + col
-            if section_index < num_tiles:
-                section = list(section_modules.keys())[section_index]
-                with cols[col]:
-                    if st.button(section, key=f"section_{section}", use_container_width=True):
-                        st.session_state.selected_section = section
-                        st.session_state.selected_module = None  # Reset selected module
-                        st.session_state.exam_started = False
-                        st.rerun()
-
     if st.session_state.selected_section:
-        # Module selection with larger tiles
-        st.header("Select Module")
-        num_modules = len(section_modules[st.session_state.selected_section])
-        num_cols = 3
-        num_rows = (num_modules // num_cols) + (1 if num_modules % num_cols != 0 else 0)
-
-        for row in range(num_rows):
-            cols = st.columns(num_cols)
-            for col in range(num_cols):
-                module_index = row * num_cols + col
-                if module_index < num_modules:
-                    module = section_modules[st.session_state.selected_section][module_index]
-                    with cols[col]:
-                        if st.button(module, key=f"module_{module}", use_container_width=True):
-                            st.session_state.selected_module = module
-                            st.session_state.exam_started = False
-                            st.rerun()
+        # Display the selected section in the module selection area
+        st.header(f"Select Module for {st.session_state.selected_section}")
+        
+        # Module selection with 3 tiles per row
+        columns = st.columns(3)  # Create 3 columns for modules
+        for idx, module in enumerate(section_modules[st.session_state.selected_section]):
+            with columns[idx % 3]:  # Distribute modules into 3 columns
+                if st.button(module, key=f"module_{module}", use_container_width=True):
+                    st.session_state.selected_module = module
+                    st.session_state.exam_started = False
+                    st.rerun()
             
         if st.session_state.selected_module:
             # Show module information and start button
