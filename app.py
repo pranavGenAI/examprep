@@ -68,15 +68,14 @@ def show_home_page():
     if not section_modules:
         st.error("No sections found in the Excel file.")
         return
-    
-    # Section Selection
+
     st.markdown(
         """
         <style>
         .header {
-            font-size: 90px;
-            font-weight: bold;
+            font-size: 50px;
             color: purple;
+            font-weight: bold;
         }
         </style>
         """, unsafe_allow_html=True)
