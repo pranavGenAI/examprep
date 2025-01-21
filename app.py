@@ -113,14 +113,13 @@ def calculate_score(questions):
     for i, q in enumerate(questions):
         if i in st.session_state.user_answers:
             user_ans = st.session_state.user_answers[i]
-            if user_ans.startswith(q['correct_letter'].upper() + ')'):
+            if user_ans.startswith(q['correct_letter'].lower()):
                 correct += 1
     return correct, total
 
 def is_answer_correct(question, user_answer):
     if user_answer is None:
         return False
-    st.write(question['correct_letter'].upper())
     return user_answer.startswith(question['correct_letter'].lower())
 
 
