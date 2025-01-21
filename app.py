@@ -293,7 +293,7 @@ def main():
                 st.write("**Options:**")
                 for idx, option in enumerate(question['options']):
                     prefix = ""
-                    full_option = f"{prefix}{option}"
+                    full_option = f"{option}"
                     if idx == (ord(question['correct_letter']) - ord('a')):
                         st.success(f"{full_option} ✓")
                     elif user_answer == full_option:
