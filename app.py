@@ -310,8 +310,10 @@ def main():
                         st.write(full_option)
                 
                 st.write("**Your Answer:**", user_answer or "Not answered")
-                correct_option = question['options'][ord(question['correct_letter']) - ord('a')]
-                st.write("**Correct Answer:**") {correct_option}")
+                correct_option = re.sub(r"^[a-dA-D]\)", "", question['correct_answer']).strip()
+                st.write("**Correct Answer:**", correct_option)
+                # correct_option = question['options'][ord(question['correct_letter']) - ord('a')]
+                # st.write("**Correct Answer:**") {correct_option}")
                 if question['description']:
                     st.write("**Explanation:**", question['description'])
         
