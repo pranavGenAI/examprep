@@ -3,18 +3,22 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-def clean_answer(answer):
-    """Clean the answer string to handle different formats."""
-    if pd.isna(answer):
+def get_option_by_letter(options, letter):
+    """Get the option text corresponding to a letter (a,b,c,d)."""
+    if not letter or pd.isna(letter):
         return ""
-    # Remove letter prefix and clean up
-    answer = str(answer).strip()
-    if answer.lower().startswith(('a)', 'b)', 'c)', 'd)')):
-        answer = answer[2:].strip()
-    elif answer.lower() in ['a', 'b', 'c', 'd']:
-        # Map single letter to corresponding option
-        return f"Option {answer.upper()}"
-    return answer
+    letter = str(letter).strip().lower()
+    idx = ord(letter) - ord('a')
+    if 0 <= idx < len(options):
+        return options[idx]
+    return ""
+
+def get_letter_from_option(options, selected_option):
+    """Get the letter (a,b,c,d) corresponding to an option."""
+    for idx, option in enumerate(options):
+        if option == selected_option:
+            return chr(ord('a') + idx)
+    return ""
 
 def load_questions():
     """Load questions from Excel file."""
@@ -27,29 +31,23 @@ def load_questions():
             
         questions = []
         for idx, row in df.iterrows():
-            # Clean and prepare options
+            # Get options, removing any NaN values
             options = [
-                clean_answer(row.iloc[1]),  # Option A
-                clean_answer(row.iloc[2]),  # Option B
-                clean_answer(row.iloc[3]),  # Option C
-                clean_answer(row.iloc[4])   # Option D
+                str(row.iloc[1]) if not pd.isna(row.iloc[1]) else "",
+                str(row.iloc[2]) if not pd.isna(row.iloc[2]) else "",
+                str(row.iloc[3]) if not pd.isna(row.iloc[3]) else "",
+                str(row.iloc[4]) if not pd.isna(row.iloc[4]) else ""
             ]
+            options = [opt for opt in options if opt]
             
-            # Remove empty options
-            options = [opt for opt in options if opt and not pd.isna(opt)]
-            
-            correct_answer = clean_answer(row.iloc[5])
-            
-            # If correct answer is a single letter, map it to the corresponding option
-            if correct_answer.upper() in ['A', 'B', 'C', 'D']:
-                correct_idx = ord(correct_answer.upper()) - ord('A')
-                if correct_idx < len(options):
-                    correct_answer = options[correct_idx]
+            # Get correct answer letter (a,b,c,d)
+            correct_letter = str(row.iloc[5]).strip().lower() if not pd.isna(row.iloc[5]) else ""
             
             questions.append({
                 'question': row.iloc[0],
                 'options': options,
-                'correct_answer': correct_answer,
+                'correct_letter': correct_letter,
+                'correct_answer': get_option_by_letter(options, correct_letter),
                 'description': row.iloc[6] if not pd.isna(row.iloc[6]) else ""
             })
         return questions
@@ -75,9 +73,8 @@ def calculate_score(questions):
     total = len(questions)
     for i, q in enumerate(questions):
         if i in st.session_state.user_answers:
-            user_ans = clean_answer(st.session_state.user_answers[i])
-            correct_ans = clean_answer(q['correct_answer'])
-            if user_ans == correct_ans:
+            user_ans = st.session_state.user_answers[i]
+            if user_ans.startswith(q['correct_letter'] + ')'):
                 correct += 1
     return correct, total
 
@@ -85,7 +82,7 @@ def is_answer_correct(question, user_answer):
     """Check if the user's answer is correct."""
     if user_answer is None:
         return False
-    return clean_answer(user_answer) == clean_answer(question['correct_answer'])
+    return user_answer.startswith(question['correct_letter'] + ')')
 
 def main():
     st.set_page_config(page_title="Professional Exam Portal", layout="wide")
@@ -100,8 +97,6 @@ def main():
             border-radius: 10px;
             margin: 10px 0;
         }
-        .correct-answer { color: #00c853; }
-        .incorrect-answer { color: #ff1744; }
         .review-header-correct {
             background-color: #e8f5e9;
             padding: 10px;
@@ -151,9 +146,10 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
+            options = [f"{chr(65 + i)}) {opt}" for i, opt in enumerate(current_q['options'])]
             selected_answer = st.radio(
                 "Select your answer:",
-                [f"{chr(65 + i)}) {opt}" for i, opt in enumerate(current_q['options'])],
+                options,
                 key=f"q_{st.session_state.current_question}",
                 index=None
             )
@@ -196,7 +192,6 @@ def main():
             user_answer = st.session_state.user_answers.get(i)
             is_correct = is_answer_correct(question, user_answer)
             
-            # Show correct/incorrect status before expanding
             status_color = "correct" if is_correct else "incorrect"
             st.markdown(f"""
                 <div class="review-header-{status_color}">
@@ -210,15 +205,16 @@ def main():
                 for idx, option in enumerate(question['options']):
                     prefix = f"{chr(65 + idx)}) "
                     full_option = f"{prefix}{option}"
-                    if clean_answer(option) == clean_answer(question['correct_answer']):
+                    if idx == (ord(question['correct_letter']) - ord('a')):
                         st.success(f"{full_option} ✓")
-                    elif user_answer and full_option == user_answer:
+                    elif user_answer == full_option:
                         st.error(f"{full_option} ✗")
                     else:
                         st.write(full_option)
                 
                 st.write("**Your Answer:**", user_answer or "Not answered")
-                st.write("**Correct Answer:**", f"{question['correct_answer']}")
+                correct_option = get_option_by_letter(question['options'], question['correct_letter'])
+                st.write("**Correct Answer:**", f"{question['correct_letter'].upper()}) {correct_option}")
                 if question['description']:
                     st.write("**Explanation:**", question['description'])
         
