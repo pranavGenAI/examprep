@@ -69,7 +69,7 @@ def show_home_page():
         st.error("No sections found in the Excel file.")
         return
     
-        st.markdown(
+    st.markdown(
         """
         <style>
         .custom-header {
@@ -79,7 +79,7 @@ def show_home_page():
             font-family: Arial, sans-serif;
         }
         </style>
-        """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     # Using h1 tag to ensure styling is applied
     st.markdown('<h1 class="custom-header">Select Exam Section</h1>', unsafe_allow_html=True)
