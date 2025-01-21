@@ -225,6 +225,7 @@ def main():
         for i, question in enumerate(questions):
             user_answer = st.session_state.user_answers.get(i)
             is_correct = is_answer_correct(question, user_answer)
+            st.write(is_correct)
             status_color = "correct" if is_correct else "incorrect"
             st.markdown(f"<div class='review-header-{status_color}'>Question {i + 1}: {'✓ Correct' if is_correct else '✗ Incorrect'}</div>", unsafe_allow_html=True)
             
