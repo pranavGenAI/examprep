@@ -151,6 +151,8 @@ def main():
         return
 
     # Exam Interface
+# In the exam interface part, where you display the questions:
+
     if not st.session_state.exam_submitted:
         st.title(f"Exam: {st.session_state.selected_section}")
         st.subheader(f"Module: {st.session_state.selected_module}")
@@ -166,17 +168,19 @@ def main():
             if st.button("Next →") and st.session_state.current_question < len(questions) - 1:
                 st.session_state.current_question += 1
                 st.rerun()
-
+    
         st.progress((st.session_state.current_question + 1) / len(questions))
         st.write(f"Question {st.session_state.current_question + 1} of {len(questions)}")
         
         current_q = questions[st.session_state.current_question]
         st.markdown(f"<div class='question-box'><h3>Question {st.session_state.current_question + 1}</h3><p>{current_q['question']}</p></div>", unsafe_allow_html=True)
-        
-        selected_answer = st.radio("Select your answer:", current_q['options'], key=f"q_{st.session_state.current_question}")
+    
+        # Set the selected_answer to None to prevent default selection
+        selected_answer = st.radio("Select your answer:", current_q['options'], key=f"q_{st.session_state.current_question}", index=None)
+    
         if selected_answer:
             st.session_state.user_answers[st.session_state.current_question] = selected_answer
-        
+
         st.markdown("---")
         cols = st.columns(len(questions))
         for i, col in enumerate(cols):
