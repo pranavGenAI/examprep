@@ -74,7 +74,8 @@ def show_home_page():
         """
         <style>
         .header {
-            font-size: 20px;
+            font-size: 40px;
+            font-weight: bold;
             color: purple;
         }
         </style>
