@@ -5,18 +5,33 @@ from datetime import datetime
 def load_questions():
     """Load questions from Excel file."""
     try:
+        # Read Excel file - now using column indices instead of letter names
         df = pd.read_excel('questions.xlsx')
+        
+        # Verify the dataframe has enough columns
+        if len(df.columns) < 7:
+            st.error("Excel file must have at least 7 columns (Question, 4 Options, Answer, and Description)")
+            return []
+            
         questions = []
-        for _, row in df.iterrows():
+        for idx, row in df.iterrows():
             questions.append({
-                'question': row['A'],
-                'options': [row['B'], row['C'], row['D'], row['E']],
-                'correct_answer': row['F'],
-                'description': row['G']
+                'question': row.iloc[0],  # First column (Question)
+                'options': [
+                    row.iloc[1],  # Second column (Option 1)
+                    row.iloc[2],  # Third column (Option 2)
+                    row.iloc[3],  # Fourth column (Option 3)
+                    row.iloc[4]   # Fifth column (Option 4)
+                ],
+                'correct_answer': row.iloc[5],  # Sixth column (Correct Answer)
+                'description': row.iloc[6]  # Seventh column (Description)
             })
         return questions
+    except FileNotFoundError:
+        st.error("Could not find 'questions.xlsx'. Please ensure the file exists in the same directory.")
+        return []
     except Exception as e:
-        st.error(f"Error loading questions: {str(e)}")
+        st.error(f"Error loading questions: {str(e)}\nPlease check your Excel file format.")
         return []
 
 def initialize_session_state():
@@ -71,7 +86,16 @@ def main():
     questions = load_questions()
     
     if not questions:
-        st.error("No questions found. Please check your Excel file.")
+        st.error("""
+        No questions found. Please check your Excel file format:
+        - Column 1: Question
+        - Column 2: Option 1
+        - Column 3: Option 2
+        - Column 4: Option 3
+        - Column 5: Option 4
+        - Column 6: Correct Answer
+        - Column 7: Description
+        """)
         return
     
     # Header
