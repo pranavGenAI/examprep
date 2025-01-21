@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import re
+import random
 
 # Load sections and modules
 def load_sections_and_modules():
@@ -35,7 +35,8 @@ def load_questions(selected_section, selected_module):
                 'options': options,
                 'correct_letter': correct_letter,
                 'correct_answer': options[ord(correct_letter) - ord('a')] if correct_letter else "",
-                'description': row.iloc[6] if not pd.isna(row.iloc[6]) else ""
+                'description': row.iloc[6] if not pd.isna(row.iloc[6]) else "",
+                'section': row.iloc[7]  # Adding the section information
             })
         return questions
     except Exception as e:
@@ -59,6 +60,23 @@ def initialize_session_state():
     if 'start_time' not in st.session_state:
         st.session_state.start_time = None
 
+# Randomize questions based on section-wise distribution
+def randomize_questions(questions):
+    sections = {
+        'AI Fundamentals': 7,
+        'AI Capabilities in CRM': 3,
+        'Data for AI': 14,
+        'Ethical Considerations of AI': 16
+    }
+
+    randomized_questions = []
+    for section, num_questions in sections.items():
+        section_questions = [q for q in questions if q['section'] == section]
+        randomized_questions += random.sample(section_questions, num_questions)
+
+    random.shuffle(randomized_questions)  # Shuffle overall questions
+    return randomized_questions
+
 # Show Home Page with Section and Module selection
 def show_home_page():
     st.title("Salesforce AI Associate Exam Dump")
@@ -69,18 +87,6 @@ def show_home_page():
         st.error("No sections found in the Excel file.")
         return
     
-    st.markdown(
-        """
-        <style>
-        h1 {
-            font-size: 10px;
-            color: purple;
-            font-weight: bold;
-            font-family: Arial, sans-serif;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
     st.markdown('<h3>Select Exam Section</h3>', unsafe_allow_html=True)
 
     columns = st.columns(3)
@@ -115,6 +121,7 @@ def show_home_page():
                 if st.button("Start Exam", use_container_width=True):
                     st.session_state.exam_started = True
                     st.session_state.start_time = datetime.now()
+                    st.session_state.questions = randomize_questions(questions)
                     st.rerun()
             else:
                 st.error("No questions found for this module.")
@@ -128,12 +135,6 @@ def calculate_score(questions):
             if user_ans.startswith(q['correct_letter'].lower()):
                 correct += 1
     return correct, total
-
-def is_answer_correct(question, user_answer):
-    if user_answer is None:
-        return False
-    return user_answer.startswith(question['correct_letter'].lower())
-
 
 # Main Function to display the exam and results
 def main():
@@ -155,14 +156,12 @@ def main():
         return
 
     # Load questions
-    questions = load_questions(st.session_state.selected_section, st.session_state.selected_module)
+    questions = st.session_state.questions
     if not questions:
         st.error("No questions found.")
         return
 
     # Exam Interface
-# In the exam interface part, where you display the questions:
-
     if not st.session_state.exam_submitted:
         st.title(f"Exam: {st.session_state.selected_section}")
         st.subheader(f"Module: {st.session_state.selected_module}")
@@ -183,7 +182,7 @@ def main():
         st.write(f"Question {st.session_state.current_question + 1} of {len(questions)}")
         
         current_q = questions[st.session_state.current_question]
-        st.markdown(f"<div class='question-box'><h3>Question {st.session_state.current_question + 1}</h3><p>{current_q['question']}</p></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='question-box'><h3 style='color: grey;'>{current_q['section']} - Question {st.session_state.current_question + 1}</h3><p>{current_q['question']}</p></div>", unsafe_allow_html=True)
     
         # Set the selected_answer to None to prevent default selection
         selected_answer = st.radio("Select your answer:", current_q['options'], key=f"q_{st.session_state.current_question}", index=None)
