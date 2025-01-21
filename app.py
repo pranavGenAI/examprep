@@ -322,3 +322,34 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+st.markdown("""<style>
+    .main { padding: 2rem; }
+    .stButton button { width: 100%; }
+    .question-box {
+        background-color: #000000; /* Black background */
+        color: white; /* White text */
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    .review-header-correct {
+        background-color: #e8f5e9;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+    .review-header-incorrect {
+        background-color: #ffebee;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+    .section-card {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 10px 0;
+    }
+    </style>""", unsafe_allow_html=True)
