@@ -73,7 +73,7 @@ def show_home_page():
         """
         <style>
         .custom-header {
-            font-size: 50px;
+            font-size: 35px;
             color: purple;
             font-weight: bold;
             font-family: Arial, sans-serif;
