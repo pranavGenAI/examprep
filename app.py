@@ -121,7 +121,7 @@ def is_answer_correct(question, user_answer):
     if user_answer is None:
         return False
     st.write(question['correct_letter'].upper())
-    return user_answer.startswith(question['correct_letter'].upper())
+    return user_answer.startswith(question['correct_letter'].lower())
 
 
 # Main Function to display the exam and results
