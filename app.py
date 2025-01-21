@@ -28,7 +28,7 @@ def load_questions(selected_section, selected_module):
     try:
         df = pd.read_excel('questions.xlsx')
         # Filter questions by section and module
-        module_df = df[
+        module_df = df[ 
             (df.iloc[:, 7] == selected_section) & 
             (df.iloc[:, 8] == selected_module)
         ]
@@ -86,37 +86,32 @@ def show_home_page():
         st.error("No sections found in the Excel file. Please check the format.")
         return
     
-    # Section selection
+    # Section selection with tiles
     st.header("Select Exam Section")
-    selected_section = st.selectbox(
-        "Choose a section:",
-        options=list(section_modules.keys()),
-        index=None,
-        placeholder="Select section..."
-    )
+    for section in section_modules.keys():
+        if st.button(section, key=f"section_{section}", use_container_width=True):
+            st.session_state.selected_section = section
+            st.session_state.selected_module = None  # Reset selected module
+            st.session_state.exam_started = False
+            st.rerun()
     
-    if selected_section:
-        st.session_state.selected_section = selected_section
-        
-        # Module selection
+    if st.session_state.selected_section:
+        # Module selection with tiles
         st.header("Select Module")
-        selected_module = st.selectbox(
-            "Choose a module:",
-            options=section_modules[selected_section],
-            index=None,
-            placeholder="Select module..."
-        )
-        
-        if selected_module:
-            st.session_state.selected_module = selected_module
+        for module in section_modules[st.session_state.selected_section]:
+            if st.button(module, key=f"module_{module}", use_container_width=True):
+                st.session_state.selected_module = module
+                st.session_state.exam_started = False
+                st.rerun()
             
+        if st.session_state.selected_module:
             # Show module information and start button
             st.markdown("---")
             st.markdown("### Module Information")
-            st.markdown(f"**Selected Section:** {selected_section}")
-            st.markdown(f"**Selected Module:** {selected_module}")
+            st.markdown(f"**Selected Section:** {st.session_state.selected_section}")
+            st.markdown(f"**Selected Module:** {st.session_state.selected_module}")
             
-            questions = load_questions(selected_section, selected_module)
+            questions = load_questions(st.session_state.selected_section, st.session_state.selected_module)
             if questions:
                 st.markdown(f"**Total Questions:** {len(questions)}")
                 
@@ -146,8 +141,7 @@ def main():
     st.set_page_config(page_title="Professional Exam Portal", layout="wide")
     
     # Custom CSS
-    st.markdown("""
-        <style>
+    st.markdown("""<style>
         .main { padding: 2rem; }
         .stButton button { width: 100%; }
         .question-box {
@@ -175,8 +169,7 @@ def main():
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin: 10px 0;
         }
-        </style>
-    """, unsafe_allow_html=True)
+        </style>""", unsafe_allow_html=True)
     
     initialize_session_state()
     
@@ -197,7 +190,7 @@ def main():
         st.subheader(f"Module: {st.session_state.selected_module}")
         st.markdown("---")
         
-        col1, col2, col3 = st.columns([2,8,2])
+        col1, col2, col3 = st.columns([2, 8, 2])
         with col1:
             if st.button("← Previous") and st.session_state.current_question > 0:
                 st.session_state.current_question -= 1
@@ -208,7 +201,7 @@ def main():
                 st.session_state.current_question += 1
                 st.rerun()
         
-        # Rest of your existing exam UI code...
+        # Show current question
         st.progress((st.session_state.current_question + 1) / len(questions))
         st.write(f"Question {st.session_state.current_question + 1} of {len(questions)}")
         
@@ -232,6 +225,7 @@ def main():
             if selected_answer:
                 st.session_state.user_answers[st.session_state.current_question] = selected_answer
         
+        # Navigation buttons
         st.markdown("---")
         cols = st.columns(len(questions))
         for i, col in enumerate(cols):
@@ -257,7 +251,7 @@ def main():
                     st.rerun()
     
     else:
-        # Show results with section and module info
+        # Show results
         st.title("Exam Results")
         st.subheader(f"Section: {st.session_state.selected_section}")
         st.subheader(f"Module: {st.session_state.selected_module}")
@@ -274,6 +268,7 @@ def main():
         with col3:
             st.metric("Score", f"{percentage:.1f}%")
         
+        # Review answers
         st.markdown("### Review Answers")
         for i, question in enumerate(questions):
             user_answer = st.session_state.user_answers.get(i)
@@ -305,6 +300,7 @@ def main():
                 if question['description']:
                     st.write("**Explanation:**", question['description'])
         
+        # Navigation buttons for results
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Return to Home", type="secondary"):
