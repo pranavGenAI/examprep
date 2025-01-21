@@ -86,23 +86,44 @@ def show_home_page():
         st.error("No sections found in the Excel file. Please check the format.")
         return
     
-    # Section selection with tiles
+    # Section selection with larger tiles
     st.header("Select Exam Section")
-    for section in section_modules.keys():
-        if st.button(section, key=f"section_{section}", use_container_width=True):
-            st.session_state.selected_section = section
-            st.session_state.selected_module = None  # Reset selected module
-            st.session_state.exam_started = False
-            st.rerun()
+    num_tiles = len(section_modules)
+    num_cols = 3  # We want no more than 3 columns
+    num_rows = (num_tiles // num_cols) + (1 if num_tiles % num_cols != 0 else 0)
     
+    tile_buttons = []
+    for row in range(num_rows):
+        cols = st.columns(num_cols)
+        for col in range(num_cols):
+            section_index = row * num_cols + col
+            if section_index < num_tiles:
+                section = list(section_modules.keys())[section_index]
+                with cols[col]:
+                    if st.button(section, key=f"section_{section}", use_container_width=True):
+                        st.session_state.selected_section = section
+                        st.session_state.selected_module = None  # Reset selected module
+                        st.session_state.exam_started = False
+                        st.rerun()
+
     if st.session_state.selected_section:
-        # Module selection with tiles
+        # Module selection with larger tiles
         st.header("Select Module")
-        for module in section_modules[st.session_state.selected_section]:
-            if st.button(module, key=f"module_{module}", use_container_width=True):
-                st.session_state.selected_module = module
-                st.session_state.exam_started = False
-                st.rerun()
+        num_modules = len(section_modules[st.session_state.selected_section])
+        num_cols = 3
+        num_rows = (num_modules // num_cols) + (1 if num_modules % num_cols != 0 else 0)
+
+        for row in range(num_rows):
+            cols = st.columns(num_cols)
+            for col in range(num_cols):
+                module_index = row * num_cols + col
+                if module_index < num_modules:
+                    module = section_modules[st.session_state.selected_section][module_index]
+                    with cols[col]:
+                        if st.button(module, key=f"module_{module}", use_container_width=True):
+                            st.session_state.selected_module = module
+                            st.session_state.exam_started = False
+                            st.rerun()
             
         if st.session_state.selected_module:
             # Show module information and start button
@@ -143,7 +164,9 @@ def main():
     # Custom CSS
     st.markdown("""<style>
         .main { padding: 2rem; }
-        .stButton button { width: 100%; }
+        .stButton button { width: 100%; height: 120px; font-size: 18px; font-weight: bold; }
+        .stButton { margin: 10px 0; }
+        .stButton button:hover { background-color: #4CAF50; }
         .question-box {
             background-color: #f0f2f6;
             padding: 20px;
@@ -294,25 +317,7 @@ def main():
                     else:
                         st.write(full_option)
                 
-                st.write("**Your Answer:**", user_answer or "Not answered")
-                correct_option = question['options'][ord(question['correct_letter']) - ord('a')]
-                st.write("**Correct Answer:**", f"{question['correct_letter'].upper()}) {correct_option}")
-                if question['description']:
-                    st.write("**Explanation:**", question['description'])
-        
-        # Navigation buttons for results
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Return to Home", type="secondary"):
-                st.session_state.clear()
-                st.rerun()
-        with col2:
-            if st.button("Start New Exam", type="primary"):
-                st.session_state.exam_submitted = False
-                st.session_state.exam_started = False
-                st.session_state.user_answers = {}
-                st.session_state.current_question = 0
-                st.rerun()
-
+                st.write("**Answer Explanation:**", question['description'])
+    
 if __name__ == "__main__":
     main()
