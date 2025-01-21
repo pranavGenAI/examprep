@@ -76,7 +76,7 @@ def initialize_session_state():
         st.session_state.start_time = None
 
 def show_home_page():
-    st.title("Professional Exam Portal")
+    st.title("Salesforce AI Associate Exam Dump")
     st.markdown("---")
     
     # Load sections and modules
