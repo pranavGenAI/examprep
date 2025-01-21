@@ -95,7 +95,7 @@ def show_home_page():
 
     # Module Selection
     if st.session_state.selected_section:
-        st.header(f"Select Module for {st.session_state.selected_section}")
+        #st.header(f"Select Module for {st.session_state.selected_section}")
         columns = st.columns(3)
         for idx, module in enumerate(section_modules[st.session_state.selected_section]):
             with columns[idx % 3]:
