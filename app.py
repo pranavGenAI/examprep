@@ -70,7 +70,17 @@ def show_home_page():
         return
     
     # Section Selection
-    st.header("Select Exam Section")
+    st.markdown(
+        """
+        <style>
+        .header {
+            font-size: 20px;
+            color: purple;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('<p class="header">Select Exam Section</p>', unsafe_allow_html=True)
     columns = st.columns(3)
     for idx, section in enumerate(section_modules.keys()):
         with columns[idx % 3]:
