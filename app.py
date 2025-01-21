@@ -72,17 +72,16 @@ def show_home_page():
     st.markdown(
         """
         <style>
-        .custom-header {
-            font-size: 5px;
+        h1 {
+            font-size: 50px;
             color: purple;
             font-weight: bold;
             font-family: Arial, sans-serif;
         }
         </style>
-    """, unsafe_allow_html=True)
-    
-    # Using h1 tag to ensure styling is applied
-    st.markdown('<h1 class="custom-header">Select Exam Section</h1>', unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+    st.markdown('<h1>Select Exam Section</h1>', unsafe_allow_html=True)
 
     columns = st.columns(3)
     for idx, section in enumerate(section_modules.keys()):
@@ -95,7 +94,7 @@ def show_home_page():
 
     # Module Selection
     if st.session_state.selected_section:
-        #st.header(f"Select Module for {st.session_state.selected_section}")
+        st.header(f"Select Module for {st.session_state.selected_section}")
         columns = st.columns(3)
         for idx, module in enumerate(section_modules[st.session_state.selected_section]):
             with columns[idx % 3]:
