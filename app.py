@@ -221,7 +221,7 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            options = [f"{chr(65 + i)}) {opt}" for i, opt in enumerate(current_q['options'])]
+            options = [opt for opt in current_q['options']]
             selected_answer = st.radio(
                 "Select your answer:",
                 options,
