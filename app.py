@@ -149,7 +149,7 @@ def main():
             options = [f"{chr(65 + i)}) {opt}" for i, opt in enumerate(current_q['options'])]
             selected_answer = st.radio(
                 "Select your answer:",
-               # options,
+                options,
                 key=f"q_{st.session_state.current_question}",
                 index=None
             )
