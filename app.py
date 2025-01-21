@@ -3,34 +3,38 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-def get_option_by_letter(options, letter):
-    """Get the option text corresponding to a letter (a,b,c,d)."""
-    if not letter or pd.isna(letter):
-        return ""
-    letter = str(letter).strip().lower()
-    idx = ord(letter) - ord('a')
-    if 0 <= idx < len(options):
-        return options[idx]
-    return ""
-
-def get_letter_from_option(options, selected_option):
-    """Get the letter (a,b,c,d) corresponding to an option."""
-    for idx, option in enumerate(options):
-        if option == selected_option:
-            return chr(ord('a') + idx)
-    return ""
-
-def load_questions():
-    """Load questions from Excel file."""
+def load_sections_and_modules():
+    """Load unique sections and their corresponding modules from Excel."""
     try:
         df = pd.read_excel('questions.xlsx')
+        sections = df.iloc[:, 7].unique()  # Column H (index 7)
         
-        if len(df.columns) < 7:
-            st.error("Excel file must have at least 7 columns")
-            return []
+        # Create section to modules mapping
+        section_modules = {}
+        for section in sections:
+            if pd.isna(section):
+                continue
+            # Get modules for this section from Column I (index 8)
+            modules = df[df.iloc[:, 7] == section].iloc[:, 8].unique()
+            section_modules[section] = [m for m in modules if not pd.isna(m)]
             
+        return section_modules
+    except Exception as e:
+        st.error(f"Error loading sections and modules: {str(e)}")
+        return {}
+
+def load_questions(selected_section, selected_module):
+    """Load questions for selected section and module."""
+    try:
+        df = pd.read_excel('questions.xlsx')
+        # Filter questions by section and module
+        module_df = df[
+            (df.iloc[:, 7] == selected_section) & 
+            (df.iloc[:, 8] == selected_module)
+        ]
+        
         questions = []
-        for idx, row in df.iterrows():
+        for idx, row in module_df.iterrows():
             # Get options, removing any NaN values
             options = [
                 str(row.iloc[1]) if not pd.isna(row.iloc[1]) else "",
@@ -47,13 +51,10 @@ def load_questions():
                 'question': row.iloc[0],
                 'options': options,
                 'correct_letter': correct_letter,
-                'correct_answer': get_option_by_letter(options, correct_letter),
+                'correct_answer': options[ord(correct_letter) - ord('a')] if correct_letter else "",
                 'description': row.iloc[6] if not pd.isna(row.iloc[6]) else ""
             })
         return questions
-    except FileNotFoundError:
-        st.error("Could not find 'questions.xlsx'")
-        return []
     except Exception as e:
         st.error(f"Error loading questions: {str(e)}")
         return []
@@ -65,8 +66,66 @@ def initialize_session_state():
         st.session_state.user_answers = {}
     if 'exam_submitted' not in st.session_state:
         st.session_state.exam_submitted = False
+    if 'exam_started' not in st.session_state:
+        st.session_state.exam_started = False
+    if 'selected_section' not in st.session_state:
+        st.session_state.selected_section = None
+    if 'selected_module' not in st.session_state:
+        st.session_state.selected_module = None
     if 'start_time' not in st.session_state:
-        st.session_state.start_time = datetime.now()
+        st.session_state.start_time = None
+
+def show_home_page():
+    st.title("Professional Exam Portal")
+    st.markdown("---")
+    
+    # Load sections and modules
+    section_modules = load_sections_and_modules()
+    
+    if not section_modules:
+        st.error("No sections found in the Excel file. Please check the format.")
+        return
+    
+    # Section selection
+    st.header("Select Exam Section")
+    selected_section = st.selectbox(
+        "Choose a section:",
+        options=list(section_modules.keys()),
+        index=None,
+        placeholder="Select section..."
+    )
+    
+    if selected_section:
+        st.session_state.selected_section = selected_section
+        
+        # Module selection
+        st.header("Select Module")
+        selected_module = st.selectbox(
+            "Choose a module:",
+            options=section_modules[selected_section],
+            index=None,
+            placeholder="Select module..."
+        )
+        
+        if selected_module:
+            st.session_state.selected_module = selected_module
+            
+            # Show module information and start button
+            st.markdown("---")
+            st.markdown("### Module Information")
+            st.markdown(f"**Selected Section:** {selected_section}")
+            st.markdown(f"**Selected Module:** {selected_module}")
+            
+            questions = load_questions(selected_section, selected_module)
+            if questions:
+                st.markdown(f"**Total Questions:** {len(questions)}")
+                
+                if st.button("Start Exam", type="primary", use_container_width=True):
+                    st.session_state.exam_started = True
+                    st.session_state.start_time = datetime.now()
+                    st.rerun()
+            else:
+                st.error("No questions found for this module.")
 
 def calculate_score(questions):
     correct = 0
@@ -74,19 +133,19 @@ def calculate_score(questions):
     for i, q in enumerate(questions):
         if i in st.session_state.user_answers:
             user_ans = st.session_state.user_answers[i]
-            if user_ans.startswith(q['correct_letter'] + ')'):
+            if user_ans.startswith(q['correct_letter'].upper() + ')'):
                 correct += 1
     return correct, total
 
 def is_answer_correct(question, user_answer):
-    """Check if the user's answer is correct."""
     if user_answer is None:
         return False
-    return user_answer.startswith(question['correct_letter'] + ')')
+    return user_answer.startswith(question['correct_letter'].upper() + ')')
 
 def main():
     st.set_page_config(page_title="Professional Exam Portal", layout="wide")
     
+    # Custom CSS
     st.markdown("""
         <style>
         .main { padding: 2rem; }
@@ -109,20 +168,35 @@ def main():
             border-radius: 5px;
             margin: 5px 0;
         }
+        .section-card {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 10px 0;
+        }
         </style>
     """, unsafe_allow_html=True)
     
     initialize_session_state()
-    questions = load_questions()
+    
+    if not st.session_state.exam_started:
+        show_home_page()
+        return
+    
+    # Load questions for selected section and module
+    questions = load_questions(st.session_state.selected_section, st.session_state.selected_module)
     
     if not questions:
         st.error("No questions found. Please check your Excel file format.")
         return
     
-    st.title("Professional Exam Portal")
-    st.markdown("---")
-    
     if not st.session_state.exam_submitted:
+        # Show exam header with section and module info
+        st.title(f"Exam: {st.session_state.selected_section}")
+        st.subheader(f"Module: {st.session_state.selected_module}")
+        st.markdown("---")
+        
         col1, col2, col3 = st.columns([2,8,2])
         with col1:
             if st.button("← Previous") and st.session_state.current_question > 0:
@@ -134,6 +208,7 @@ def main():
                 st.session_state.current_question += 1
                 st.rerun()
         
+        # Rest of your existing exam UI code...
         st.progress((st.session_state.current_question + 1) / len(questions))
         st.write(f"Question {st.session_state.current_question + 1} of {len(questions)}")
         
@@ -146,7 +221,7 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            options = [opt for opt in current_q['options']]
+            options = [f"{chr(65 + i)}) {opt}" for i, opt in enumerate(current_q['options'])]
             selected_answer = st.radio(
                 "Select your answer:",
                 options,
@@ -167,18 +242,30 @@ def main():
                 st.rerun()
         
         st.markdown("---")
-        if st.button("Submit Exam", type="primary"):
-            if len(st.session_state.user_answers) < len(questions):
-                st.warning("Please answer all questions before submitting.")
-            else:
-                st.session_state.exam_submitted = True
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            if st.button("Exit Exam", type="secondary"):
+                st.session_state.clear()
                 st.rerun()
+        
+        with col2:
+            if st.button("Submit Exam", type="primary"):
+                if len(st.session_state.user_answers) < len(questions):
+                    st.warning("Please answer all questions before submitting.")
+                else:
+                    st.session_state.exam_submitted = True
+                    st.rerun()
     
     else:
+        # Show results with section and module info
+        st.title("Exam Results")
+        st.subheader(f"Section: {st.session_state.selected_section}")
+        st.subheader(f"Module: {st.session_state.selected_module}")
+        st.markdown("---")
+        
         correct, total = calculate_score(questions)
         percentage = (correct / total) * 100
         
-        st.header("Exam Results")
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("Total Questions", total)
@@ -203,7 +290,7 @@ def main():
                 st.write("**Question:**", question['question'])
                 st.write("**Options:**")
                 for idx, option in enumerate(question['options']):
-                    prefix = f"{chr(65 + idx)}) "
+                    prefix = ""
                     full_option = f"{prefix}{option}"
                     if idx == (ord(question['correct_letter']) - ord('a')):
                         st.success(f"{full_option} ✓")
@@ -213,14 +300,23 @@ def main():
                         st.write(full_option)
                 
                 st.write("**Your Answer:**", user_answer or "Not answered")
-                correct_option = get_option_by_letter(question['options'], question['correct_letter'])
+                correct_option = question['options'][ord(question['correct_letter']) - ord('a')]
                 st.write("**Correct Answer:**", f"{question['correct_letter'].upper()}) {correct_option}")
                 if question['description']:
                     st.write("**Explanation:**", question['description'])
         
-        if st.button("Start New Exam"):
-            st.session_state.clear()
-            st.rerun()
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Return to Home", type="secondary"):
+                st.session_state.clear()
+                st.rerun()
+        with col2:
+            if st.button("Start New Exam", type="primary"):
+                st.session_state.exam_submitted = False
+                st.session_state.exam_started = False
+                st.session_state.user_answers = {}
+                st.session_state.current_question = 0
+                st.rerun()
 
 if __name__ == "__main__":
     main()
