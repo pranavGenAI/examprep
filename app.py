@@ -74,7 +74,6 @@ def initialize_session_state():
         st.session_state.selected_module = None
     if 'start_time' not in st.session_state:
         st.session_state.start_time = None
-
 def show_home_page():
     st.title("Salesforce AI Associate Exam Dump")
     st.markdown("---")
@@ -128,6 +127,7 @@ def show_home_page():
             else:
                 st.error("No questions found for this module.")
 
+
 def calculate_score(questions):
     correct = 0
     total = len(questions)
@@ -149,9 +149,7 @@ def main():
     # Custom CSS
     st.markdown("""<style>
         .main { padding: 2rem; }
-        .stButton button { width: 100%; height: 120px; font-size: 18px; font-weight: bold; }
-        .stButton { margin: 10px 0; }
-        .stButton button:hover { background-color: #4CAF50; }
+        .stButton button { width: 100%; }
         .question-box {
             background-color: #f0f2f6;
             padding: 20px;
@@ -302,7 +300,25 @@ def main():
                     else:
                         st.write(full_option)
                 
-                st.write("**Answer Explanation:**", question['description'])
-    
+                st.write("**Your Answer:**", user_answer or "Not answered")
+                correct_option = question['options'][ord(question['correct_letter']) - ord('a')]
+                st.write("**Correct Answer:**", f"{question['correct_letter'].upper()}) {correct_option}")
+                if question['description']:
+                    st.write("**Explanation:**", question['description'])
+        
+        # Navigation buttons for results
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Return to Home", type="secondary"):
+                st.session_state.clear()
+                st.rerun()
+        with col2:
+            if st.button("Start New Exam", type="primary"):
+                st.session_state.exam_submitted = False
+                st.session_state.exam_started = False
+                st.session_state.user_answers = {}
+                st.session_state.current_question = 0
+                st.rerun()
+
 if __name__ == "__main__":
     main()
