@@ -81,7 +81,7 @@ def show_home_page():
         </style>
         """, unsafe_allow_html=True)
 
-    st.markdown('<h1>Select Exam Section</h1>', unsafe_allow_html=True)
+    st.markdown('<h3>Select Exam Section</h3>', unsafe_allow_html=True)
 
     columns = st.columns(3)
     for idx, section in enumerate(section_modules.keys()):
