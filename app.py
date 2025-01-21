@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import re
 
 def load_sections_and_modules():
     """Load unique sections and their corresponding modules from Excel."""
@@ -141,9 +142,16 @@ def calculate_score(questions):
 def is_answer_correct(question, user_answer):
     if user_answer is None:
         return False
-    # Ensure the comparison is case-insensitive and strip any extra spaces
-    return user_answer.strip().lower() == (question['correct_letter'].lower() + ') ' + question['correct_answer']).strip().lower()
 
+    # Normalize user answer by removing leading letter and parenthesis (e.g., "b)")
+    normalized_user_answer = re.sub(r"^[a-dA-D]\)", "", user_answer).strip()
+
+    # Normalize correct answer by removing leading letter and parenthesis (e.g., "B)")
+    normalized_correct_answer = re.sub(r"^[a-dA-D]\)", "", question['correct_answer']).strip()
+
+    # Compare the normalized answers, ignoring case
+    return normalized_user_answer.lower() == normalized_correct_answer.lower()
+    
 def main():
     st.set_page_config(page_title="Professional Exam Portal", layout="wide")
     
