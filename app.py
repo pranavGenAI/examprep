@@ -68,11 +68,11 @@ def show_home_page():
     if not section_modules:
         st.error("No sections found in the Excel file.")
         return
-
+    
     st.markdown(
         """
         <style>
-        .header {
+        .custom-header {
             font-size: 50px;
             color: purple;
             font-weight: bold;
@@ -80,7 +80,9 @@ def show_home_page():
         </style>
         """, unsafe_allow_html=True)
     
-    st.markdown('<p class="header">Select Exam Section</p>', unsafe_allow_html=True)
+    # Use custom HTML for the header
+    st.markdown('<p class="custom-header">Select Exam Section</p>', unsafe_allow_html=True)
+    
     columns = st.columns(3)
     for idx, section in enumerate(section_modules.keys()):
         with columns[idx % 3]:
