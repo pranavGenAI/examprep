@@ -146,13 +146,13 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-        options = [opt for opt in current_q['options']]
-        selected_answer = st.radio(
-            "Select your answer:",
-            options,
-            key=f"q_{st.session_state.current_question}",
-            index=None
-        )
+            options = [opt for opt in current_q['options']]
+            selected_answer = st.radio(
+                "Select your answer:",
+                options,
+                key=f"q_{st.session_state.current_question}",
+                index=None
+            )
             
             if selected_answer:
                 st.session_state.user_answers[st.session_state.current_question] = selected_answer
