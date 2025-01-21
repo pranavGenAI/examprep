@@ -141,7 +141,8 @@ def calculate_score(questions):
 def is_answer_correct(question, user_answer):
     if user_answer is None:
         return False
-    return user_answer.startswith(question['correct_letter'].upper() + ')')
+    # Ensure the comparison is case-insensitive and strip any extra spaces
+    return user_answer.strip().lower() == (question['correct_letter'].lower() + ') ' + question['correct_answer']).strip().lower()
 
 def main():
     st.set_page_config(page_title="Professional Exam Portal", layout="wide")
