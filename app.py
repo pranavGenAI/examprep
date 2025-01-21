@@ -10,8 +10,9 @@ def load_questions():
         for _, row in df.iterrows():
             questions.append({
                 'question': row['A'],
-                'correct_answer': row['B'],
-                'description': row['C']
+                'options': [row['B'], row['C'], row['D'], row['E']],
+                'correct_answer': row['F'],
+                'description': row['G']
             })
         return questions
     except Exception as e:
@@ -57,6 +58,9 @@ def main():
             border-radius: 10px;
             margin: 10px 0;
         }
+        .option-text {
+            margin-left: 10px;
+        }
         </style>
     """, unsafe_allow_html=True)
     
@@ -101,10 +105,10 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            # Radio button for answer
+            # Radio button for options
             selected_answer = st.radio(
                 "Select your answer:",
-                [current_q['correct_answer'], "Option B", "Option C", "Option D"],
+                current_q['options'],
                 key=f"q_{st.session_state.current_question}",
                 index=None
             )
@@ -150,6 +154,15 @@ def main():
         for i, question in enumerate(questions):
             with st.expander(f"Question {i + 1}"):
                 st.write("**Question:**", question['question'])
+                st.write("**Options:**")
+                for idx, option in enumerate(question['options']):
+                    if option == question['correct_answer']:
+                        st.success(f"{chr(65 + idx)}. {option} ✓")
+                    elif option == st.session_state.user_answers.get(i):
+                        st.error(f"{chr(65 + idx)}. {option} ✗")
+                    else:
+                        st.write(f"{chr(65 + idx)}. {option}")
+                
                 st.write("**Your Answer:**", st.session_state.user_answers.get(i, "Not answered"))
                 st.write("**Correct Answer:**", question['correct_answer'])
                 if st.session_state.user_answers.get(i) == question['correct_answer']:
