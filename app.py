@@ -137,7 +137,7 @@ def is_answer_correct(question, user_answer):
 
 # Main Function to display the exam and results
 def main():
-    st.set_page_config(page_title="Professional Exam Portal", layout="wide")
+    st.set_page_config(page_title="Exam Portal", layout="wide")
 
     # Custom CSS
     st.markdown("""
