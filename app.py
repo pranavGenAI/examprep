@@ -153,7 +153,7 @@ def show_login_page():
         if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.experimental_rerun()  # Reload to show the main exam page
+            st.rerun()  # Reload to show the main exam page
         else:
             st.error("Invalid username or password")
 
