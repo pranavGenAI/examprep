@@ -191,14 +191,25 @@ def main():
         if selected_answer:
             st.session_state.user_answers[st.session_state.current_question] = selected_answer
 
-        st.markdown("---")
-        cols = st.columns(len(questions))
-        for i, col in enumerate(cols):
-            button_style = "primary" if i == st.session_state.current_question else "secondary"
-            answered_style = "✓" if i in st.session_state.user_answers else str(i + 1)
-            if col.button(answered_style, key=f"nav_{i}", type=button_style):
-                st.session_state.current_question = i
-                st.rerun()
+        max_buttons_per_row = 20
+        num_rows = (len(questions) + max_buttons_per_row - 1) // max_buttons_per_row  # Calculate number of rows
+        
+        for row in range(num_rows):
+            cols = st.columns(min(max_buttons_per_row, len(questions) - row * max_buttons_per_row))
+            
+            for i, col in enumerate(cols):
+                idx = row * max_buttons_per_row + i  # Calculate the actual question index
+                
+                if idx >= len(questions):
+                    break
+                
+                button_style = "primary" if idx == st.session_state.current_question else "secondary"
+                answered_style = "✓" if idx in st.session_state.user_answers else str(idx + 1)
+                
+                if col.button(answered_style, key=f"nav_{idx}", type=button_style):
+                    st.session_state.current_question = idx
+                    st.rerun()
+
 
         # Exit and Submit Buttons
         col1, col2 = st.columns([1, 1])
