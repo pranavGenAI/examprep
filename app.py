@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import re
 
+VALID_USERS = {"admin": "admin123", "user": "password456"}
 # Load sections and modules
 def load_sections_and_modules():
     try:
@@ -135,20 +136,40 @@ def is_answer_correct(question, user_answer):
     return user_answer.startswith(question['correct_letter'].lower())
 
 
-# Main Function to display the exam and results
+
+# Login Page Function
+def login_page():
+    st.title("Login Page")
+    
+    username = st.text_input("Username")
+    password = st.password_input("Password")
+
+    if st.button("Login"):
+        if username in VALID_USERS and VALID_USERS[username] == password:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.experimental_rerun()
+        else:
+            st.error("Invalid username or password")
+
 def main():
     st.set_page_config(page_title="Exam Portal", layout="wide")
 
     # Custom CSS
-    st.markdown("""
-    <style>
+    st.markdown("""<style>
         .stButton button { width: 100%; }
         .question-box { background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin: 10px 0; }
         .review-header-correct { background-color: #e8f5e9; padding: 10px; border-radius: 5px; margin: 5px 0; }
         .review-header-incorrect { background-color: #ffebee; padding: 10px; border-radius: 5px; margin: 5px 0; }
     </style>""", unsafe_allow_html=True)
 
+    # Initialize session state
     initialize_session_state()
+
+    # Login check
+    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+        login_page()
+        return
 
     if not st.session_state.exam_started:
         show_home_page()
@@ -161,8 +182,6 @@ def main():
         return
 
     # Exam Interface
-# In the exam interface part, where you display the questions:
-
     if not st.session_state.exam_submitted:
         st.title(f"Exam: {st.session_state.selected_section}")
         st.subheader(f"Module: {st.session_state.selected_module}")
@@ -192,7 +211,8 @@ def main():
             st.session_state.user_answers[st.session_state.current_question] = selected_answer
         st.markdown("---")
         st.markdown("")
-        st.markdown("")
+
+        # Navigation buttons for questions
         max_buttons_per_row = 25
         num_rows = (len(questions) + max_buttons_per_row - 1) // max_buttons_per_row  # Calculate number of rows
         
