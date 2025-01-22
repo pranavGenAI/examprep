@@ -171,7 +171,7 @@ def main():
 
     # Login check
     if 'logged_in' not in st.session_state or not st.session_state.logged_in:
-        login_page()
+        show_login_page()
         return
 
     if not st.session_state.exam_started:
