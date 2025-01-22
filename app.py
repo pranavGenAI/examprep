@@ -136,19 +136,22 @@ def is_answer_correct(question, user_answer):
     return user_answer.startswith(question['correct_letter'].lower())
 
 
+# Login Page
+def show_login_page():
+    st.title("Login to Salesforce AI Associate Exam Dump")
 
-# Login Page Function
-def login_page():
-    st.title("Login Page")
-    
+    # Username input
     username = st.text_input("Username")
-    password = st.password_input("Password")
 
+    # Password input
+    password = st.text_input("Password", type="password")
+
+    # Login button
     if st.button("Login"):
-        if username in VALID_USERS and VALID_USERS[username] == password:
+        if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.experimental_rerun()
+            st.experimental_rerun()  # Reload to show the main exam page
         else:
             st.error("Invalid username or password")
 
