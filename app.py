@@ -141,21 +141,23 @@ def is_answer_correct(question, user_answer):
 # Login Page
 def show_login_page():
     st.title("Login to Salesforce AI Associate Exam Dump")
-
+    col1, col2, col3 = st.columns([3, 2, 2])
+    with col1:
+        
     # Username input
-    username = st.text_input("Username")
-
-    # Password input
-    password = st.text_input("Password", type="password")
-
-    # Login button
-    if st.button("Login"):
-        if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.rerun()  # Reload to show the main exam page
-        else:
-            st.error("Invalid username or password")
+        username = st.text_input("Username")
+    
+        # Password input
+        password = st.text_input("Password", type="password")
+    
+        # Login button
+        if st.button("Login"):
+            if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.rerun()  # Reload to show the main exam page
+            else:
+                st.error("Invalid username or password")
 
 def main():
     st.set_page_config(page_title="Exam Portal", layout="wide")
