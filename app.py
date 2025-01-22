@@ -190,8 +190,7 @@ def main():
     
         if selected_answer:
             st.session_state.user_answers[st.session_state.current_question] = selected_answer
-        st.markdown("")
-        st.markdown("")
+        st.markdown("---")
         st.markdown("")
         st.markdown("")
         max_buttons_per_row = 25
