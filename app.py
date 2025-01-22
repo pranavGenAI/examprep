@@ -190,8 +190,10 @@ def main():
     
         if selected_answer:
             st.session_state.user_answers[st.session_state.current_question] = selected_answer
-
-        max_buttons_per_row = 30
+        st.markdown("")
+        st.markdown("")
+        st.markdown("")
+        max_buttons_per_row = 25
         num_rows = (len(questions) + max_buttons_per_row - 1) // max_buttons_per_row  # Calculate number of rows
         
         for row in range(num_rows):
