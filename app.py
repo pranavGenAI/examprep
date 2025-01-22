@@ -4,7 +4,9 @@ import numpy as np
 from datetime import datetime
 import re
 
-VALID_USERS = {"admin": "admin123", "user": "password456"}
+USER_CREDENTIALS = {
+    "admin": "admin123",  # Replace with actual username and password
+}
 # Load sections and modules
 def load_sections_and_modules():
     try:
