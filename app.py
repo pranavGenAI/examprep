@@ -5,7 +5,7 @@ from datetime import datetime
 import re
 
 USER_CREDENTIALS = {
-    "admin": "admin123",  # Replace with actual username and password
+    "SalesforceAI": "ACN123",  # Replace with actual username and password
 }
 # Load sections and modules
 def load_sections_and_modules():
@@ -140,7 +140,7 @@ def is_answer_correct(question, user_answer):
 
 # Login Page
 def show_login_page():
-    st.title("Login to Salesforce AI Associate Exam Dump")
+    st.title("Login")
     col1, col2, col3 = st.columns([3, 2, 2])
     with col1:
         
